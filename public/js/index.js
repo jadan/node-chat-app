@@ -1,6 +1,7 @@
 //client side javascript
 var socket = io(); 
 
+
 socket.on('connect', function(){
 	console.log('Connected to server.');
 	// socket.emit('createMessage', {
@@ -14,21 +15,28 @@ socket.on('disconnect', function(){
 });
 
 socket.on('newMessage', function(message){
-	var li = jQuery('<li></li>');
-	li.text(`${message.from}: ${message.text}`);
-
-	//render to the DOM 
-	jQuery('#messages').append(li);
+	var formattedTime = moment(message.createAt).format('h:mm a');
+	var template = jQuery('#message-template').html();
+	var html = Mustache.render(template, {
+		text: message.text,
+		from: message.from,
+		createAt: formattedTime
+	});
+	jQuery('#messages').append(html);
 });
 
 socket.on('newLocationMessage', function(message){
-	var li = jQuery('<li></li>');
-	var a = jQuery('<a target="_blank">My current location</a>');
-	li.text(`${message.from}: `);
-	a.attr('href', message.url);
-	li.append(a);
-	//render to the DOM 
-	jQuery('#messages').append(li);	
+	var formattedTime = moment(message.createAt).format('h:mm a');	
+
+	var template = jQuery('#location-message-template').html();
+	var html = Mustache.render(template, {
+		url: message.url,
+		from: message.from,
+		createAt: formattedTime
+	});
+
+	jQuery('#messages').append(html);
+	
 });
 
 jQuery('#message-form').on('submit', function(e) {
